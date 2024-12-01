@@ -17,7 +17,6 @@ jobs:
           current_tag=$(<swagger-ui.version)
           echo "current_tag=$current_tag" >> $GITHUB_OUTPUT
       - name: Update Swagger UI
-        if: steps.swagger-ui.outputs.current_tag != steps.swagger-ui.outputs.release_tag
         env:
           RELEASE_TAG: ${{ steps.swagger-ui.outputs.release_tag }}
           SWAGGER_YAML: "swagger.yaml"
