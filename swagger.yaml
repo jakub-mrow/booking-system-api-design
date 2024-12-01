@@ -1,65 +1,40 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
-  title: Conference Room Booking API
-  description: API for managing conference room bookings and events.
+  title: Conference Room Booking System API
   version: 1.0.0
-
+  description: API for managing conference room bookings and availability.
+servers:
+  - url: /api
 paths:
-  /auth/login:
-    post:
-      summary: User login
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
-      responses:
-        '200':
-          description: Successful login
-        '401':
-          description: Invalid credentials
-
-  /auth/logout:
-    post:
-      summary: User logout
-      responses:
-        '200':
-          description: Successful logout
-
   /rooms:
     get:
-      summary: List all rooms
+      summary: Get all rooms
       responses:
         '200':
           description: List of all rooms
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Room'
-
-    post:
-      summary: Add a new room
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Room'
-      responses:
-        '201':
-          description: Room created
-
+                type: object
+                properties:
+                  rooms:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        capacity:
+                          type: integer
+                        features:
+                          type: array
+                          items:
+                            type: string
   /rooms/{roomId}:
     get:
-      summary: View room details
+      summary: Get details of a specific room
       parameters:
         - name: roomId
           in: path
@@ -72,84 +47,159 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Room'
-
-    put:
-      summary: Update room details
-      parameters:
-        - name: roomId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Room'
-      responses:
-        '200':
-          description: Room updated
-
-    delete:
-      summary: Delete room
-      parameters:
-        - name: roomId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Room deleted
-
-  /bookings:
-    get:
-      summary: List all bookings
-      responses:
-        '200':
-          description: List of all bookings
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Booking'
-
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  capacity:
+                    type: integer
+                  features:
+                    type: array
+                    items:
+                      type: string
+                  description:
+                    type: string
+  /reservations:
     post:
-      summary: Create a new booking
+      summary: Create a reservation
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Booking'
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [booking, event]
+                roomIds:
+                  type: array
+                  items:
+                    type: string
+                date:
+                  type: string
+                  format: date
+                  nullable: true
+                startTime:
+                  type: string
+                  format: time
+                  nullable: true
+                endTime:
+                  type: string
+                  format: time
+                  nullable: true
+                startDate:
+                  type: string
+                  format: date
+                  nullable: true
+                endDate:
+                  type: string
+                  format: date
+                  nullable: true
+                numPeople:
+                  type: integer
+                  nullable: true
+                tableSetting:
+                  type: string
+                  nullable: true
+                description:
+                  type: string
       responses:
         '201':
-          description: Booking created
-
-  /bookings/{bookingId}:
+          description: Reservation created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reservationId:
+                    type: string
+                  type:
+                    type: string
+                  status:
+                    type: string
     get:
-      summary: View booking details
+      summary: Get all reservations
       parameters:
-        - name: bookingId
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [booking, event]
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: roomId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of reservations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reservations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        reservationId:
+                          type: string
+                        type:
+                          type: string
+                        roomIds:
+                          type: array
+                          items:
+                            type: string
+                        date:
+                          type: string
+                          format: date
+                        startDate:
+                          type: string
+                          format: date
+                        endDate:
+                          type: string
+                          format: date
+                        startTime:
+                          type: string
+                          format: time
+                        endTime:
+                          type: string
+                          format: time
+                        status:
+                          type: string
+  /reservations/{reservationId}:
+    get:
+      summary: Get reservation details
+      parameters:
+        - name: reservationId
           in: path
           required: true
           schema:
             type: string
       responses:
         '200':
-          description: Booking details
+          description: Reservation details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Booking'
-
+                type: object
     put:
-      summary: Update booking details
+      summary: Update a reservation
       parameters:
-        - name: bookingId
+        - name: reservationId
           in: path
           required: true
           schema:
@@ -159,78 +209,97 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Booking'
+              type: object
+              properties:
+                roomIds:
+                  type: array
+                  items:
+                    type: string
+                date:
+                  type: string
+                  format: date
+                startTime:
+                  type: string
+                  format: time
+                endTime:
+                  type: string
+                numPeople:
+                  type: integer
+                tableSetting:
+                  type: string
       responses:
         '200':
-          description: Booking updated
-
+          description: Reservation updated
     delete:
-      summary: Cancel booking
+      summary: Cancel a reservation
       parameters:
-        - name: bookingId
+        - name: reservationId
           in: path
           required: true
           schema:
             type: string
       responses:
-        '204':
-          description: Booking canceled
-
-components:
-  schemas:
-    Room:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        capacity:
-          type: integer
-        features:
-          type: array
-          items:
+        '200':
+          description: Reservation canceled
+  /rooms/availability/calendar:
+    get:
+      summary: Fetch room availability for a date range
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
             type: string
-
-    Booking:
-      type: object
-      properties:
-        id:
-          type: string
-        roomId:
-          type: string
-        date:
-          type: string
-          format: date
-        startTime:
-          type: string
-          format: time
-        endTime:
-          type: string
-          format: time
-        numPeople:
-          type: integer
-        tableSetting:
-          type: string
-        description:
-          type: string
-
-    Event:
-      type: object
-      properties:
-        id:
-          type: string
-        eventName:
-          type: string
-        startDate:
-          type: string
-          format: date
-        endDate:
-          type: string
-          format: date
-        roomIds:
-          type: array
-          items:
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
             type: string
-        description:
-          type: string
+            format: date
+        - name: roomId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Room availability for the specified date range
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rooms:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        availability:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              date:
+                                type: string
+                                format: date
+                              timeSlots:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    startTime:
+                                      type: string
+                                      format: time
+                                    endTime:
+                                      type: string
+                                      format: time
+                                    status:
+                                      type: string
+                                      enum: [available, reserved]
+                                    bookingId:
+                                      type: string
+                                      nullable: true
